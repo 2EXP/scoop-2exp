@@ -1,0 +1,66 @@
+{
+    "version": "1.14.3",
+    "description": "sing-box 的 Windows 图形客户端 | Windows GUI client for sing-box, the universal proxy platform",
+    "homepage": "https://sing-box.sagernet.org/clients/desktop",
+    "license": {
+        "identifier": "GPL-3.0-or-later"
+    },
+    "notes_cn": "TUN 模式需要管理员权限，应用会自行提权（resources\\elevate.exe）。配置保存在 %APPDATA%\\sing-box（已链接持久化），守护进程数据位于 %ProgramData%\\sing-box-daemon",
+    "notes": "TUN mode requires administrator privileges; the app elevates itself via resources\\elevate.exe. Settings live in %APPDATA%\\sing-box (linked to a persisted directory) and daemon data in %ProgramData%\\sing-box-daemon",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-x64.exe",
+            "hash": "ba65f354f9096ff31b612ce6784abce417ab3628faa06e8b47c0203cc045c731"
+        },
+        "arm64": {
+            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-arm64.exe",
+            "hash": "fa9cdd25a5474f9caf394d4ab25068d9c7a28abcc08aba801af3321106dadfc9"
+        }
+    },
+    "extract_to": "app",
+    "shortcuts": [
+        [
+            "app\\sing-box.exe",
+            "sing-box"
+        ]
+    ],
+    "link": "$env:AppData\\sing-box",
+    "pre_install": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Start-Install",
+        "$stage = Join-Path $dir 'stage'; $null = New-Item -ItemType Directory -Path $stage -Force; Move-Item -LiteralPath (Join-Path $dir \"app\\$(@($fname)[0])\") -Destination $stage; Expand-7zipArchive -Path (Join-Path $stage \"$(@($fname)[0])\") -DestinationPath $stage; Expand-7zipArchive -Path (Join-Path $stage '$PLUGINSDIR\\app-64.7z') -DestinationPath (Join-Path $dir 'app'); Remove-Item -LiteralPath $stage -Recurse -Force"
+    ],
+    "post_install": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Complete-Install"
+    ],
+    "pre_uninstall": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Start-Uninstall",
+        "A-Stop-Process",
+        "A-Remove-Link"
+    ],
+    "post_uninstall": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Complete-Uninstall"
+    ],
+    "checkver": {
+        "github": {
+            "channel": "latest"
+        }
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/SagerNet/sing-box/releases/download/v$version/SFW-$version-x64.exe"
+            },
+            "arm64": {
+                "url": "https://github.com/SagerNet/sing-box/releases/download/v$version/SFW-$version-arm64.exe"
+            }
+        }
+    }
+}
