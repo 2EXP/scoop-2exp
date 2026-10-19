@@ -1,0 +1,78 @@
+{
+    "version": "1.1.3203.01",
+    "description": "Accessibility Insights for Windows：帮助开发者发现并修复 Windows 应用的无障碍问题 | Helps developers find and fix accessibility issues in Windows applications",
+    "homepage": "https://accessibilityinsights.io/docs/windows/overview",
+    "license": {
+        "identifier": "MIT"
+    },
+    "notes_cn": [
+        "这是 Canary 预发布版（上游把最新构建标记为 pre-release），更新较快，可能引入回归问题",
+        "上游以 MSI 分发并安装到 Program Files；本清单只解包其文件，不注册安装信息，因此没有 UIAccess（无法在 UIAccess 模式下检查提权窗口），需要时请以管理员身份运行",
+        "配置保存在 %LOCALAPPDATA%\\AccessibilityInsights（已链接持久化）",
+        "应用自带自动更新检查，若提示更新请忽略或改用 scoop update，避免它把 MSI 装到 Program Files 之外",
+        "界面依赖 WebView2（Windows 11 自带；Windows 10 需安装 Edge WebView2 Runtime）"
+    ],
+    "notes": [
+        "This is a Canary pre-release build (upstream marks its newest builds as pre-release); updates are frequent and may contain regressions",
+        "Upstream ships an MSI that installs into Program Files; this manifest only unpacks the files and does not register an installation, so there is no UIAccess (elevated windows cannot be inspected in UIAccess mode) — run as administrator when needed",
+        "Settings are stored in %LOCALAPPDATA%\\AccessibilityInsights (linked to a persisted directory)",
+        "The app has its own update check; ignore it or use scoop update instead, otherwise it may install the MSI outside Scoop",
+        "The UI relies on WebView2 (built into Windows 11; Windows 10 needs Edge WebView2 Runtime)"
+    ],
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/microsoft/accessibility-insights-windows/releases/download/v1.1.3203.01/AccessibilityInsights.msi",
+            "hash": "f8ff0fdf34f5b3c4862090136fbdd8f3c4e9e163ff852d4b740767046103404b"
+        },
+        "arm64": {
+            "url": "https://github.com/microsoft/accessibility-insights-windows/releases/download/v1.1.3203.01/AccessibilityInsights.msi",
+            "hash": "f8ff0fdf34f5b3c4862090136fbdd8f3c4e9e163ff852d4b740767046103404b"
+        }
+    },
+    "extract_dir": "PFiles\\AccessibilityInsights\\1.1",
+    "extract_to": "app",
+    "shortcuts": [
+        [
+            "app\\AccessibilityInsights.exe",
+            "Accessibility Insights for Windows"
+        ]
+    ],
+    "link": "$env:LocalAppData\\AccessibilityInsights",
+    "pre_install": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Start-Install"
+    ],
+    "post_install": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Complete-Install"
+    ],
+    "pre_uninstall": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Start-Uninstall",
+        "A-Stop-Process",
+        "A-Remove-Link"
+    ],
+    "post_uninstall": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Complete-Uninstall"
+    ],
+    "checkver": {
+        "github": {
+            "channel": "newest"
+        }
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/microsoft/accessibility-insights-windows/releases/download/v$version/AccessibilityInsights.msi"
+            },
+            "arm64": {
+                "url": "https://github.com/microsoft/accessibility-insights-windows/releases/download/v$version/AccessibilityInsights.msi"
+            }
+        }
+    }
+}
