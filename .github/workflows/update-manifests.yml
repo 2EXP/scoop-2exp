@@ -57,19 +57,30 @@ jobs:
           "SCOOP_HOME=$(Join-Path $env:USERPROFILE 'scoop\apps\scoop\current')" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           scoop --version
 
-      - name: Install PowerShell YAML module
+      - name: Cache PowerShell modules
+        uses: actions/cache@v5
+        with:
+          path: ~/Documents/PowerShell/Modules
+          # The key follows this workflow file, so editing PS_MODULES below refreshes the cache.
+          key: psmodules-${{ runner.os }}-${{ hashFiles('.github/workflows/update-manifests.yml') }}
+
+      - name: Install PowerShell modules
         shell: pwsh
-        run: |
+        env:
           # checkver's `winget` source parses winget-pkgs YAML, which needs ConvertFrom-Yaml.
-          if (-not (Get-Module -ListAvailable powershell-yaml)) {
-            try {
-              Get-PackageProvider -Name NuGet -ErrorAction Stop | Out-Null
-            } catch {
-              Install-PackageProvider -Name NuGet -Force -Scope CurrentUser | Out-Null
-            }
-            Install-Module powershell-yaml -Scope CurrentUser -Force -AllowClobber -SkipPublisherCheck
+          PS_MODULES: powershell-yaml
+        run: |
+          try {
+            Get-PackageProvider -Name NuGet -ErrorAction Stop | Out-Null
+          } catch {
+            Install-PackageProvider -Name NuGet -Force -Scope CurrentUser | Out-Null
           }
-          (Get-Module -ListAvailable powershell-yaml | Select-Object -First 1).Version
+          foreach ($module in ($env:PS_MODULES -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
+            if (-not (Get-Module -ListAvailable $module)) {
+              Install-Module $module -Scope CurrentUser -Force -AllowClobber -SkipPublisherCheck
+            }
+            '{0} {1}' -f $module, (Get-Module -ListAvailable $module | Select-Object -First 1).Version
+          }
 
       - name: Check versions (dry run)
         if: ${{ inputs.dry_run }}
