@@ -1,54 +1,55 @@
 {
     "version": "1.14.3",
-    "description": "sing-box 的 Windows 图形客户端（官方安装器版，含系统服务） | Windows GUI client for sing-box, installed with the official installer including the system service",
+    "description": "sing-box 的 Windows 图形客户端（机器级安装，含系统服务） | Windows GUI client for sing-box, installed machine-wide with the daemon service",
     "homepage": "https://sing-box.sagernet.org/clients/desktop",
     "license": {
         "identifier": "GPL-3.0-or-later"
     },
     "notes_cn": [
-        "机器级安装：使用官方 NSIS 安装器装到 C:\\Program Files\\sing-box，安装、更新、卸载都需要管理员权限，请在提权终端里执行 scoop 命令",
-        "安装器会注册 sing-box-daemon 系统服务（LocalSystem、自动启动），TUN 模式不再需要每次提权",
-        "程序在 C:\\Program Files\\sing-box；GUI 数据在 C:\\ProgramData\\sing-box，服务数据在 C:\\ProgramData\\sing-box-daemon",
-        "卸载默认保留数据；要一并清除请手动运行 Uninstall sing-box.exe 并加 --delete-app-data",
-        "不能与便携版（解包安装）共存：同名服务 sing-box-daemon 与同一份数据目录会冲突"
+        "脚本化机器级安装：解包官方安装器里的 app-64.7z 到 C:\\Program Files\\sing-box，并注册 sing-box-daemon 服务；安装、更新、卸载都需要管理员权限，请在提权终端里执行 scoop 命令",
+        "不运行官方安装器——该安装器在部分 Windows 版本上会因预检异常直接退出（代码 30），所以这里只取它的应用载荷",
+        "服务以 LocalSystem 运行、自动启动，TUN 模式不再需要每次提权",
+        "GUI 数据在 C:\\ProgramData\\sing-box，服务数据在 C:\\ProgramData\\sing-box-daemon；卸载会保留数据",
+        "不能与官方安装器版同时存在：同一安装路径、同一服务名 sing-box-daemon"
     ],
     "notes": [
-        "Machine-wide install: the official NSIS installer places files in C:\\Program Files\\sing-box; install, update and uninstall all require administrator rights, so run scoop from an elevated terminal",
-        "The installer registers the sing-box-daemon system service (LocalSystem, automatic start), so TUN mode no longer needs elevation each time",
-        "Program files live in C:\\Program Files\\sing-box; GUI data in C:\\ProgramData\\sing-box and service data in C:\\ProgramData\\sing-box-daemon",
-        "Data is kept on uninstall; to remove it as well, run Uninstall sing-box.exe with --delete-app-data",
-        "Cannot coexist with the portable (unpacked) build: the sing-box-daemon service name and data directories collide"
+        "Scripted machine-wide install: unpacks app-64.7z from the official installer into C:\\Program Files\\sing-box and registers the sing-box-daemon service; install, update and uninstall all require administrator rights, so run scoop from an elevated terminal",
+        "The official installer is never executed — it aborts with code 30 on some Windows builds because of a preflight failure — only its application payload is used",
+        "The service runs as LocalSystem with automatic start, so TUN mode no longer needs elevation each time",
+        "GUI data lives in C:\\ProgramData\\sing-box and service data in C:\\ProgramData\\sing-box-daemon; uninstall keeps the data",
+        "Cannot coexist with an installer-based copy: same installation path and same sing-box-daemon service name"
     ],
     "architecture": {
         "64bit": {
-            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-x64.exe",
+            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-x64.exe#/dl.7z",
             "hash": "ba65f354f9096ff31b612ce6784abce417ab3628faa06e8b47c0203cc045c731"
         },
         "arm64": {
-            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-arm64.exe",
+            "url": "https://github.com/SagerNet/sing-box/releases/download/v1.14.3/SFW-1.14.3-arm64.exe#/dl.7z",
             "hash": "fa9cdd25a5474f9caf394d4ab25068d9c7a28abcc08aba801af3321106dadfc9"
         }
     },
     "location": "$env:ProgramFiles\\sing-box",
+    "extract_to": "app",
     "admin": true,
     "pre_install": [
         "if (!$bucket) { $bucket = '2exp' }",
         ". $bucketsdir\\$bucket\\util\\_.ps1",
         "A-Start-Install",
-        "Get-Process -Name 'sing-box' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 1000",
-        "A-Install-App -Uninstaller 'Uninstall sing-box.exe' -TimeoutSec 1800"
+        "$daemon = \"$env:ProgramFiles\\\\sing-box\\\\resources\\\\daemon\\\\sing-box-daemon.exe\"; if (Test-Path -LiteralPath $daemon) { & $daemon service stop 2>&1 | Out-Null; Start-Sleep -Seconds 2 }; Get-Process -Name 'sing-box' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 800; $payload = Get-ChildItem -LiteralPath $dir -Recurse -Filter 'app-64.7z' -ErrorAction SilentlyContinue | Select-Object -First 1; if (!$payload) { error 'app-64.7z not found in the installer payload'; A-Show-IssueCreationPrompt; A-Exit }; $target = \"$env:ProgramFiles\\sing-box\"; New-Item -ItemType Directory -Path $target -Force | Out-Null; Expand-7zipArchive -Path $payload.FullName -DestinationPath $target -Removal:$false"
     ],
     "post_install": [
         "if (!$bucket) { $bucket = '2exp' }",
         ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "$daemon = \"$env:ProgramFiles\\sing-box\\resources\\daemon\\sing-box-daemon.exe\"; & $daemon service install --working-directory \"$env:ProgramData\\sing-box-daemon\"; if ($LASTEXITCODE -ne 0) { error \"sing-box-daemon service install failed ($LASTEXITCODE)\"; A-Show-IssueCreationPrompt; A-Exit }; $key = 'HKLM:\\SOFTWARE\\SagerNet\\sing-box'; New-Item -Path $key -Force | Out-Null; New-ItemProperty -Path $key -Name 'LayoutVersion' -Value 2 -PropertyType DWord -Force | Out-Null; New-ItemProperty -Path $key -Name 'InstallationID' -Value ([guid]::NewGuid().ToString('B')) -PropertyType String -Force | Out-Null; New-ItemProperty -Path $key -Name 'ApplicationDataDirectory' -Value \"$env:ProgramData\\sing-box\" -PropertyType String -Force | Out-Null; New-ItemProperty -Path $key -Name 'DaemonDataDirectory' -Value \"$env:ProgramData\\sing-box-daemon\" -PropertyType String -Force | Out-Null; $lnk = \"$env:ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\sing-box.lnk\"; $ws = New-Object -ComObject WScript.Shell; $sc = $ws.CreateShortcut($lnk); $sc.TargetPath = \"$env:ProgramFiles\\sing-box\\sing-box.exe\"; $sc.IconLocation = \"$env:ProgramFiles\\sing-box\\sing-box.exe\"; $sc.WorkingDirectory = \"$env:ProgramFiles\\sing-box\"; $sc.Save()",
         "A-Complete-Install"
     ],
     "pre_uninstall": [
         "if (!$bucket) { $bucket = '2exp' }",
         ". $bucketsdir\\$bucket\\util\\_.ps1",
         "A-Start-Uninstall",
-        "A-Stop-Process",
-        "A-Uninstall-App -ArgumentList '/allusers', '/S'"
+        "Get-Process -Name 'sing-box' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 500",
+        "$daemon = \"$env:ProgramFiles\\sing-box\\resources\\daemon\\sing-box-daemon.exe\"; if (Test-Path -LiteralPath $daemon) { & $daemon service uninstall 2>&1 | Out-Null }; Remove-Item -LiteralPath \"$env:ProgramFiles\\sing-box\" -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -LiteralPath \"$env:ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\sing-box.lnk\" -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'HKLM:\\SOFTWARE\\SagerNet\\sing-box' -Recurse -Force -ErrorAction SilentlyContinue"
     ],
     "post_uninstall": [
         "if (!$bucket) { $bucket = '2exp' }",
@@ -63,10 +64,10 @@
     "autoupdate": {
         "architecture": {
             "64bit": {
-                "url": "https://github.com/SagerNet/sing-box/releases/download/v$version/SFW-$version-x64.exe"
+                "url": "https://github.com/SagerNet/sing-box/releases/download/v$version/SFW-$version-x64.exe#/dl.7z"
             },
             "arm64": {
-                "url": "https://github.com/SagerNet/sing-box/releases/download/v$version/SFW-$version-arm64.exe"
+                "url": "https://github.com/SagerNet/sing-box/releases/download/v$version/SFW-$version-arm64.exe#/dl.7z"
             }
         }
     }
