@@ -35,6 +35,7 @@
         "if (!$bucket) { $bucket = '2exp' }",
         ". $bucketsdir\\$bucket\\util\\_.ps1",
         "A-Start-Install",
+        "A-Stop-Process",
         "A-Install-App -Uninstaller 'Uninstall sing-box.exe' -TimeoutSec 1800"
     ],
     "post_install": [
