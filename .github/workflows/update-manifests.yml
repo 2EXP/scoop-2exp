@@ -57,6 +57,20 @@ jobs:
           "SCOOP_HOME=$(Join-Path $env:USERPROFILE 'scoop\apps\scoop\current')" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           scoop --version
 
+      - name: Install PowerShell YAML module
+        shell: pwsh
+        run: |
+          # checkver's `winget` source parses winget-pkgs YAML, which needs ConvertFrom-Yaml.
+          if (-not (Get-Module -ListAvailable powershell-yaml)) {
+            try {
+              Get-PackageProvider -Name NuGet -ErrorAction Stop | Out-Null
+            } catch {
+              Install-PackageProvider -Name NuGet -Force -Scope CurrentUser | Out-Null
+            }
+            Install-Module powershell-yaml -Scope CurrentUser -Force -AllowClobber -SkipPublisherCheck
+          }
+          (Get-Module -ListAvailable powershell-yaml | Select-Object -First 1).Version
+
       - name: Check versions (dry run)
         if: ${{ inputs.dry_run }}
         shell: pwsh

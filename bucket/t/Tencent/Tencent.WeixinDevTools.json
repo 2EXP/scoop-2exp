@@ -1,0 +1,80 @@
+{
+    "version": "2.02.2609231",
+    "description": "微信开发者工具：帮助开发者简单高效地开发和调试微信小程序与公众号网页 | Weixin DevTools - develop and debug WeChat Mini Programs and Official Account web pages efficiently",
+    "homepage": "https://developers.weixin.qq.com/miniprogram/dev/devtools/devtools.html",
+    "license": {
+        "identifier": "Freeware"
+    },
+    "notes_cn": [
+        "免管理员版本：直接解包官方 NSIS 安装器（官方安装器内嵌 requireAdministrator，必须提权才能运行），因此不会注册文件关联（.wxml/.wxss/.wxproj/.mgepackage）与卸载信息",
+        "应用内的「检查更新」会调用官方安装器（需要管理员），请改用 scoop update 更新",
+        "登录态与项目缓存保存在 %LOCALAPPDATA%\\微信开发者工具（已链接持久化），卸载不会丢失",
+        "命令行入口：wechat-devtools（即官方 cli.bat，支持 open/login/preview 等子命令）"
+    ],
+    "notes": [
+        "No-admin build: the official NSIS installer is unpacked instead of executed (it embeds requireAdministrator), so file associations (.wxml/.wxss/.wxproj/.mgepackage) and uninstall entries are not registered",
+        "The in-app 'check for updates' runs the official installer and needs administrator rights; use scoop update instead",
+        "Login state and project caches live in %LOCALAPPDATA%\\微信开发者工具 (linked to a persisted directory) and survive uninstallation",
+        "CLI entry point: wechat-devtools (the official cli.bat; supports subcommands such as open/login/preview)"
+    ],
+    "architecture": {
+        "64bit": {
+            "url": "https://dldir1v6.qq.com/WechatWebDev/release/be1ec64cf6184b0fa64091919793f068/wechat_devtools_2.02.2609231_win32_x64.exe#/dl.7z",
+            "hash": "9f5945b190106d0a2553b1637abfd3e75b92b42c4c7d7bf4d43bdac19e060aa1"
+        }
+    },
+    "extract_to": "app",
+    "bin": [
+        [
+            "app\\cli.bat",
+            "wechat-devtools"
+        ]
+    ],
+    "shortcuts": [
+        [
+            "app\\微信开发者工具.exe",
+            "微信开发者工具"
+        ]
+    ],
+    "link": "$env:LocalAppData\\微信开发者工具",
+    "pre_install": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Start-Install",
+        "$appDir = Join-Path $dir 'app'; Remove-Item -LiteralPath (Join-Path $appDir '卸载微信开发者工具.exe.nsis') -Force -ErrorAction SilentlyContinue; Remove-Item -LiteralPath (Join-Path $appDir '$PLUGINSDIR') -Recurse -Force -ErrorAction SilentlyContinue"
+    ],
+    "post_install": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Complete-Install"
+    ],
+    "pre_uninstall": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Start-Uninstall",
+        "A-Stop-Process",
+        "A-Remove-Link"
+    ],
+    "post_uninstall": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Complete-Uninstall"
+    ],
+    "checkver": {
+        "winget": {
+            "id": "Tencent.WeixinDevTools",
+            "ext": "exe"
+        }
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "$matchX64",
+                "hash": {
+                    "url": "_.json",
+                    "jsonpath": "$.x64_machine.InstallerSha256"
+                }
+            }
+        }
+    }
+}
