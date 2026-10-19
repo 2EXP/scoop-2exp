@@ -1,0 +1,77 @@
+{
+    "version": "4.0.0-beta.6",
+    "description": "资源下载器：抓取视频号、小程序、抖音、快手、小红书、直播流、m3u8、酷狗、QQ 音乐等常见网络资源 | A GUI downloader for WeChat Channels, Douyin, Kuaishou, Xiaohongshu, live streams, m3u8 and music platforms",
+    "homepage": "https://github.com/putyy/res-downloader",
+    "license": {
+        "identifier": "Apache-2.0"
+    },
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/putyy/res-downloader/releases/download/4.0.0-beta.6/res-downloader_4.0.0-beta.6_win_amd64.exe#/res-downloader.exe",
+            "hash": "d96ebc5e5a8d0db33cf48f2f95529a7ec11c72cf855efd59f226ac87bc240148"
+        },
+        "arm64": {
+            "url": "https://github.com/putyy/res-downloader/releases/download/4.0.0-beta.6/res-downloader_4.0.0-beta.6_win_arm64.exe#/res-downloader.exe",
+            "hash": "580d2def5bda0979f7da32e2162005a8ac9869dd56010df4d5038277615910a8"
+        }
+    },
+    "extract_to": "app",
+    "shortcuts": [
+        [
+            "app\\res-downloader.exe",
+            "res-downloader"
+        ]
+    ],
+    "link": "$env:AppData\\res-downloader",
+    "notes_cn": [
+        "界面基于 WebView2：Windows 11 自带；若窗口空白，请安装 Microsoft Edge WebView2 Runtime，或改用官方的 *_fixed_webview2.exe 版本（体积大很多）",
+        "抓取 HTTPS 资源需要在应用内安装根证书，写入的是本机受信任根存储，需要以管理员身份运行才能成功",
+        "应用会临时修改系统代理（HKCU\\...\\Internet Settings），用完请在界面里关闭代理",
+        "配置、证书缓存在 %APPDATA%\\res-downloader（已链接持久化）；下载目录由应用内设置决定",
+        "发行版未做代码签名，首次运行可能被 SmartScreen 拦截"
+    ],
+    "notes": [
+        "The UI uses WebView2: built into Windows 11; if the window stays blank, install Microsoft Edge WebView2 Runtime or use the official *_fixed_webview2.exe build (much larger)",
+        "Capturing HTTPS traffic requires installing the app's root certificate, which is written to the machine trusted root store and therefore needs an elevated app",
+        "The app temporarily changes the system proxy (HKCU\\...\\Internet Settings); turn it off in the UI when done",
+        "Config and certificate cache live in %APPDATA%\\res-downloader (linked to a persisted directory); the download folder is configured inside the app",
+        "Release binaries are not code-signed, so SmartScreen may warn on first launch"
+    ],
+    "pre_install": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Start-Install"
+    ],
+    "post_install": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Complete-Install"
+    ],
+    "pre_uninstall": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Start-Uninstall",
+        "A-Stop-Process",
+        "A-Remove-Link"
+    ],
+    "post_uninstall": [
+        "if (!$bucket) { $bucket = '2exp' }",
+        ". $bucketsdir\\$bucket\\util\\_.ps1",
+        "A-Complete-Uninstall"
+    ],
+    "checkver": {
+        "github": {
+            "channel": "newest"
+        }
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/putyy/res-downloader/releases/download/$version/res-downloader_$version_win_amd64.exe#/res-downloader.exe"
+            },
+            "arm64": {
+                "url": "https://github.com/putyy/res-downloader/releases/download/$version/res-downloader_$version_win_arm64.exe#/res-downloader.exe"
+            }
+        }
+    }
+}
