@@ -52,7 +52,8 @@
         "A-Start-Uninstall",
         "Get-Process -Name 'sing-box' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 500",
         "foreach ($k in 'SOFTWARE\\Classes\\*\\shell\\Taildrop','SOFTWARE\\Classes\\sing-box profile','SOFTWARE\\Classes\\.bpf') { try { [Microsoft.Win32.Registry]::LocalMachine.DeleteSubKeyTree($k, $false) } catch {} }",
-        "$daemon = \"$env:ProgramFiles\\sing-box\\resources\\daemon\\sing-box-daemon.exe\"; if (Test-Path -LiteralPath $daemon) { & $daemon service uninstall 2>&1 | Out-Null }; Remove-Item -LiteralPath \"$env:ProgramFiles\\sing-box\" -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -LiteralPath \"$env:ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\sing-box.lnk\" -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'HKLM:\\SOFTWARE\\SagerNet\\sing-box' -Recurse -Force -ErrorAction SilentlyContinue"
+        "$daemon = \"$env:ProgramFiles\\sing-box\\resources\\daemon\\sing-box-daemon.exe\"; if (Test-Path -LiteralPath $daemon) { & $daemon service uninstall 2>&1 | Out-Null }; Remove-Item -LiteralPath \"$env:ProgramFiles\\sing-box\" -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -LiteralPath \"$env:ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\sing-box.lnk\" -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'HKLM:\\SOFTWARE\\SagerNet\\sing-box' -Recurse -Force -ErrorAction SilentlyContinue",
+        "if ((Test-Path 'HKLM:\\SOFTWARE\\SagerNet') -and -not (Get-ChildItem 'HKLM:\\SOFTWARE\\SagerNet' -ErrorAction SilentlyContinue)) { Remove-Item 'HKLM:\\SOFTWARE\\SagerNet' -Force -ErrorAction SilentlyContinue }; if ($purge) { Remove-Item 'C:\\ProgramData\\sing-box','C:\\ProgramData\\sing-box-daemon' -Recurse -Force -ErrorAction SilentlyContinue }"
     ],
     "post_uninstall": [
         "if (!$bucket) { $bucket = '2exp' }",
