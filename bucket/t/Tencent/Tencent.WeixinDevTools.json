@@ -1,5 +1,5 @@
 {
-    "version": "2.02.2609240",
+    "version": "2.02.2609250",
     "description": "微信开发者工具：帮助开发者简单高效地开发和调试微信小程序与公众号网页 | Weixin DevTools - develop and debug WeChat Mini Programs and Official Account web pages efficiently",
     "homepage": "https://developers.weixin.qq.com/miniprogram/dev/devtools/devtools.html",
     "license": {
@@ -19,8 +19,8 @@
     ],
     "architecture": {
         "64bit": {
-            "url": "https://dldir1v6.qq.com/WechatWebDev/release/be1ec64cf6184b0fa64091919793f068/wechat_devtools_2.02.2609240_win32_x64.exe",
-            "hash": "fb416fd03b51d92b6ec82b83f56f861fe6a6b2b1ceb3f9e54fa3e7fddffe9a2c"
+            "url": "https://dldir1v6.qq.com/WechatWebDev/release/be1ec64cf6184b0fa64091919793f068/wechat_devtools_2.02.2609250_win32_x64.exe",
+            "hash": "6af4acb487883f4335206171e13b9b42a27ba2b8434ee3fe83a5f43d5d49f9b8"
         }
     },
     "extract_to": "app",
